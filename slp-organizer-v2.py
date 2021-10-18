@@ -15,12 +15,10 @@ import os
 import time
 import multiprocessing as mp
 import glob
-from peppi_py import game as Game
-#from slippi import Game
+import sys
+import peppi_py
 
 NUM_PROCESSES = mp.cpu_count()
-SLP_DIR = '/home/mire/Slippi/'  # this will be set by user
-MY_CODE = 'MIRE#409'            # this will be set by user
 
 character_index = {
     '0': 'MARIO',
@@ -72,7 +70,7 @@ def pull_metadata(filename):
     Extracts date and characters from Slippi game metadata.
     '''
     metadata = {'date': None, 'mychar': None, 'oppchar': None}
-    game = Game(filename, skip_frames=True)['metadata']
+    game = peppi_py.game(filename, skip_frames=True)['metadata']
     metadata['date'] = re.findall(r'\d\d\d\d-\d\d-\d\d', game['startAt'])[0]
     if game['playedOn'] == 'dolphin':
         chars = ['']*4
@@ -126,4 +124,13 @@ def run():
             ,file_count,'files parsed in',round(time.time()-timestamp, 5),'seconds')
 
 if __name__ == '__main__':
+    SLP_DIR = input('\nEnter full path to your Slippi .slp directory: ')
+    if SLP_DIR[-1] != '/':
+        SLP_DIR += '/'
+    MY_CODE = input('Enter your connect code (ex: MIRE#409): ')
+    try:
+        if len(re.findall('.+#[0-9]+', MY_CODE)[0]) > 8:
+            raise IndexError
+    except IndexError:
+        sys.exit('Invalid code.\n')
     run()
